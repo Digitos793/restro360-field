@@ -350,7 +350,7 @@ function ocrCard(user, d) {
 function parseCard(text) {
   const lines = String(text || '').split(/\n+/).map(s => s.trim()).filter(Boolean);
   const email = (text.match(/[\w.+-]+@[\w-]+\.[\w.-]+/) || [''])[0].toLowerCase();
-  const phones = (text.match(/(?:\+?91[\s-]?|0)?[6-9]\d{2}[\s-]?\d{3}[\s-]?\d{4}/g) || []).map(normPhone).filter(Boolean);
+  const phones = (text.match(/(?:\+?91[\s-]?|0)?[6-9](?:[\s-]?\d){9}/g) || []).map(normPhone).filter(Boolean);
   const desig = /\b(owner|proprietor|founder|co-founder|director|partner|manager|ceo|chef|gm|md|head|executive|incharge|in-charge)\b/i;
   const company = /\b(restaurant|cafe|café|hotel|kitchen|foods?|pvt|ltd|llp|bakery|bakers|sweets|dhaba|caterers|bar|bistro|enterprises)\b/i;
   const designation = lines.find(l => desig.test(l) && l.length < 40) || '';

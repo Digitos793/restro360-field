@@ -6,9 +6,17 @@ Restaurant field sales ke liye app. Reps Android phone pe use karte hain, aur Ma
 ```
 apps-script/Code.gs          → backend (Google Sheet ke Apps Script editor mein paste karna hai)
 apps-script/appsscript.json  → Apps Script manifest (Drive OCR service on karta hai)
+apps-script/Demo.gs          → optional: demo data + live self-test (seedDemo / liveTest / clearDemo)
 pwa/                         → app (free hosting pe upload karna hai: GitHub Pages / Netlify)
 sample-locations.csv         → Locations sheet ka example
 ```
+
+## Live (setup ho chuka hai)
+- **App link**: https://digitos793.github.io/restro360-field/ (reps aur managers dono yahi kholenge)
+- **Database**: Google Sheet "Restro360 Field Sales" (mis@digitos.email ke Drive mein), Extensions → Apps Script → "Restro360 Field API"
+- **Demo data**: abhi 6 demo users aur Pune ke 10 demo restaurants pade hain. Demo logins `Demo.gs` (DEMO_USERS) aur Users sheet mein hain
+- **Asli use shuru karne se pehle**: Apps Script mein `clearDemo` run karo (demo data hat jayega), aur Users sheet mein default admin (9999999999) ka PIN badlo
+- **pwa update karna**: `git subtree push --prefix pwa origin gh-pages` (1-2 minute mein live)
 
 ---
 
