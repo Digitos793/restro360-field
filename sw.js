@@ -1,5 +1,5 @@
 // Service worker: app shell works offline. API calls (script.google.com) are never cached.
-const CACHE = 'r360-v1';
+const CACHE = 'r360-v2';
 const SHELL = [
   './', './index.html', './app.css', './app.js', './panel.js', './config.js', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png',
@@ -9,7 +9,7 @@ const TILE_CACHE = 'r360-tiles';
 const MAX_TILES = 400;
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL.map(u => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', e => {
@@ -39,8 +39,13 @@ self.addEventListener('fetch', e => {
   }
 
   // App shell: network first (fresh code when online), cache fallback (offline).
+  // no-cache revalidates past GitHub Pages' 10-minute browser cache so updates show up immediately.
+  const sameOrigin = url.origin === self.location.origin;
+  const net = !sameOrigin ? fetch(req)
+    : req.mode === 'navigate' ? fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' })
+    : fetch(req, { cache: 'no-cache' });
   e.respondWith(
-    fetch(req).then(res => {
+    net.then(res => {
       if (res.ok || res.type === 'opaque') caches.open(CACHE).then(c => c.put(req, res.clone()));
       return res;
     }).catch(() => caches.match(req, { ignoreSearch: true }).then(r => r || caches.match('./index.html')))
