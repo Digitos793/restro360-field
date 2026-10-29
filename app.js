@@ -417,6 +417,7 @@ const Recorder = {
 // ======================= MAPS (Leaflet + OpenStreetMap, free) =======================
 
 function makeMap(el, center, zoom) {
+  if (!el || !el.isConnected) return null;
   if (!window.L) {
     el.classList.add('map-off');
     el.textContent = 'Map needs internet';
@@ -476,14 +477,16 @@ async function render() {
   else if (S.user.role === 'REP' && !S.user.consented) name = 'consent';
   else if (!VIEWS[name] || name === 'login' || name === 'consent' || (!VIEWS[name].shared && !!VIEWS[name].panel !== isPanel())) name = homeView();
   drawNav(name === 'visit' && params.get('id') ? 'plan' : name);
-  const el = $('#view');
-  el.innerHTML = '';
+  // Each render gets its own container: a slow API reply from a screen the user already left
+  // then writes into a detached element instead of breaking the current screen.
+  const el = document.createElement('div');
+  $('#view').replaceChildren(el);
   window.scrollTo(0, 0);
   try {
     await VIEWS[name].fn(el, params);
   } catch (e) {
     console.error(e);
-    el.innerHTML = `<div class="card error">${esc(e.message)}</div>`;
+    if (el.isConnected) el.innerHTML = `<div class="card error">${esc(e.message)}</div>`;
   }
 }
 
@@ -736,7 +739,7 @@ view('plan', async (el, p) => {
     }
   };
   draw();
-  if (!S.lastPos) getPos().then(() => { if (location.hash.indexOf('#plan') === 0) { S.maps.forEach(m => m.remove()); S.maps = []; draw(); } }).catch(() => {});
+  if (!S.lastPos) getPos().then(() => { if (el.isConnected) { S.maps.forEach(m => m.remove()); S.maps = []; draw(); } }).catch(() => {});
 });
 
 view('visit', async (el, p) => {

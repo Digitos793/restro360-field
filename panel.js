@@ -21,7 +21,6 @@ function tile(v, label) { return `<div class="tile"><div class="v">${esc(v)}</di
 function stageChip(s) { return `<span class="chip ${STAGE_CHIP[s] || ''}">${esc(s || 'New')}</span>`; }
 function outcomeChip(o) { return o ? `<span class="chip" style="background:${OUTCOME_COLOR[o]}1a;color:${OUTCOME_COLOR[o]}">${esc(OUTCOME_LABEL[o] || o)}</span>` : ''; }
 function flagChips(f) { return String(f || '').split(',').map(x => x.trim()).filter(Boolean).map(x => `<span class="chip bad">${esc(x.replace(/_/g, ' ').toLowerCase())}</span>`).join(' '); }
-function stillOn(name) { return location.hash.slice(1).split('?')[0] === name; }
 
 function minutesAgo(s) {
   if (!s) return Infinity;
@@ -39,10 +38,10 @@ view('dash', async el => {
     try {
       out = await api('dashboard', { date: $('#d', el).value });
     } catch (e) {
-      $('#b', el).innerHTML = `<div class="card error">${esc(e.message)}</div>`;
+      if (el.isConnected) $('#b', el).innerHTML = `<div class="card error">${esc(e.message)}</div>`;
       return;
     }
-    if (!stillOn('dash') && location.hash) return;
+    if (!el.isConnected) return;
     S.maps.forEach(m => m.remove());
     S.maps = [];
     const k = out.kpis;
@@ -92,7 +91,7 @@ view('dash', async el => {
   $('#r', el).onclick = load;
   $('#d', el).onchange = load;
   await load();
-  S.timers.push(setInterval(load, 120000));
+  if (el.isConnected) S.timers.push(setInterval(load, 120000));
 }, { panel: true });
 
 // ======================= LEADS =======================
